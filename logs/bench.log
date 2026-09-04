@@ -10,3 +10,4 @@
 2026-09-04T04:27:23Z TICK bmc_alive=17 result=pending prog='0:00:10 stored 246812/965427' avg='0.0B/s recv, 0.0B/s write --' | core result=pending prog='' | oracle_tip=965426
 fix branch history: 2c6e989 (initial OR, failed 2 corners) -> 7481a8c (byte-floor + marginal rule, tests green) -> 2b36678 (amended message only: floor-hunt control figure corrected to fresh-sync 77KB/s; the 4.5MB/s control number belongs to the deep-archive case, not the fresh one). Live binary = 2b36678.
 2026-09-04T04:42:24Z TICK bmc_alive=17 result=pending prog='0:15:10 stored 290936/965427' avg='7.6MB/s recv, 7.6MB/s write --' | core result=pending prog='' | oracle_tip=965428
+2026-09-04T04:57:26Z TICK bmc_alive=17 result=pending prog='0:30:10 stored 327294/965427' avg='8.4MB/s recv, 8.4MB/s write --' | core result=pending prog='' | oracle_tip=965429
