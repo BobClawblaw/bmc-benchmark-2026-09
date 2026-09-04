@@ -45,3 +45,6 @@ fix branch history: 2c6e989 (initial OR, failed 2 corners) -> 7481a8c (byte-floo
 2026-09-04T12:43:41Z TICK bmc_alive=17 result=pending prog='8:16:21 stored 687408/965427' avg='11.0MB/s recv, 10.9MB/s write --' | core result=pending prog='' | oracle_tip=965476
 2026-09-04T12:58:45Z TICK bmc_alive=17 result=pending prog='8:31:31 stored 697105/965427' avg='11.0MB/s recv, 11.0MB/s write --' | core result=pending prog='' | oracle_tip=965477
 2026-09-04T13:13:47Z TICK bmc_alive=17 result=pending prog='8:46:32 stored 706456/965427' avg='11.0MB/s recv, 11.0MB/s write --' | core result=pending prog='' | oracle_tip=965480
+2026-09-04T13:20:17Z PUBLISH: origin/main moved and rebase conflicted -- pushing to the fixed base anyway
+2026-09-04T13:20:36Z main-tree publish: 66922eb benchmarks: live tick (bmc=pending core=pending) 202
+2026-09-04T13:28:50Z TICK bmc_alive=17 result=pending prog='9:01:32 stored 715435/965427' avg='11.0MB/s recv, 11.0MB/s write --' | core result=pending prog='' | oracle_tip=965480
