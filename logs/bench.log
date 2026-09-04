@@ -6,3 +6,4 @@
 2026-09-04T02:39:57Z bmc working tree uncommitted entries: 4
 2026-09-04T02:52:32Z core run1 (ports 8563) aborted intentionally at 02:52Z: stagger decision - bmc must own the box first; datadir wiped
 2026-09-04T02:58:19Z peer audit: pool median-of-medians 2.7KB/s, 22/22 workers below the 32KB/s dead-weight floor; only 2 early-kills -> floor is effectively unreachable at early-chain block sizes (min-blocks exemption keeps 10 blk/s peers alive at ~2KB/s)
+2026-09-04T04:12:16Z TICK bmc_alive=17 result=pending prog='0:08:20 stored 212948/965426' avg='4.8MB/s recv, 4.8MB/s write --' | core result=pending prog='' | oracle_tip=965426
