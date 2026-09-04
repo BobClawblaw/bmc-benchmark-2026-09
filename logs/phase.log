@@ -1,0 +1,9 @@
+2026-09-04T02:43:16Z START host=agent kernel=7.0.0-30-generic commit=f725cb7
+2026-09-04T02:43:16Z CONF port=8462 rpcport=8461 dbcache=8192
+2026-09-04T02:43:16Z DAEMON start epoch=1788489796
+2026-09-04T02:43:21Z DAEMON pid=2469834 port=8462 bind=0.0.0.0 listen=1 blocksonly=0 timeout=5000ms peertimeout=60s
+2026-09-04T02:53:21Z PHASE first 'header': 2026-09-04 02:45:25.177 [dlc] headers +416000 from 218.53.60.134:8333 (total 416001) elapsed=605s
+2026-09-04T02:53:21Z PHASE first 'bulk': 2026-09-04 02:43:16.132 [config] utxo : dbcache=8192MB -> bulk_slots=2^25 bulk_blob=6144MB bulk_gap=50000 compact_at=12 elapsed=605s
+built
+2026-09-04T03:50:05Z FIXED-RUN daemon pid=3503771 commit=2c6e989
+2026-09-04T04:00:05Z FAIL fixed daemon died

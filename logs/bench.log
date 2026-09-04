@@ -1,0 +1,8 @@
+2026-09-04T02:39:57Z === BENCHMARK SESSION START ===
+2026-09-04T02:39:57Z host=agent kernel=7.0.0-30-generic cpus=32 mem_gb=60
+2026-09-04T02:39:57Z disk: /dev/sdc3       1.8T  8.1G  1.7T   1% /mnt/2tbssd
+2026-09-04T02:39:57Z mount: /dev/sdc3 on /mnt/2tbssd type ext4 (rw,nosuid,nodev,relatime,stripe=8191)
+2026-09-04T02:39:57Z bmc source commit: aadd7509dc023ea09a85cc6a6f941304e8713b2a
+2026-09-04T02:39:57Z bmc working tree uncommitted entries: 4
+2026-09-04T02:52:32Z core run1 (ports 8563) aborted intentionally at 02:52Z: stagger decision - bmc must own the box first; datadir wiped
+2026-09-04T02:58:19Z peer audit: pool median-of-medians 2.7KB/s, 22/22 workers below the 32KB/s dead-weight floor; only 2 early-kills -> floor is effectively unreachable at early-chain block sizes (min-blocks exemption keeps 10 blk/s peers alive at ~2KB/s)

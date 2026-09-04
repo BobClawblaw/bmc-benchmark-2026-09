@@ -1,0 +1,11 @@
+2026-09-04T03:07:35Z == checkout b0c4231 (consensus: val_read_tx never skipped the OUTPUT section -- e) ==
+2026-09-04T03:16:41Z RESULT b0c4231 agg_now=1126.4KB/s blocks+33861 in 420s (~806 blk/10s) ctrl=first-run
+2026-09-04T03:16:46Z == checkout 4941321 () ==
+2026-09-04T03:16:46Z FAIL checkout 4941321
+2026-09-04T03:16:46Z == checkout 93fab72 () ==
+2026-09-04T03:16:46Z FAIL checkout 93fab72
+2026-09-04T03:16:46Z == checkout 9727a21 () ==
+2026-09-04T03:16:46Z FAIL checkout 9727a21
+2026-09-04T03:16:46Z == checkout 017a83b () ==
+2026-09-04T03:16:46Z FAIL checkout 017a83b
+2026-09-04T03:16:46Z HUNT DONE. compare RESULT lines above; pick the oldest fast commit.

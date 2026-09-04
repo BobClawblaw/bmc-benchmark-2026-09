@@ -1,0 +1,4 @@
+seq write 8GiB: 20.2s = 0.40 GiB/s
+seq read cold 8.0GiB: 19.0s = 0.42 GiB/s
+4k random O_SYNC writes: 20000 in 44.6s = 449 IOPS
+baseline done 2026-09-04T02:41:26Z
