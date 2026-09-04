@@ -39,3 +39,4 @@ fix branch history: 2c6e989 (initial OR, failed 2 corners) -> 7481a8c (byte-floo
 2026-09-04T11:16:20Z main-tree publish: 7758457 benchmarks: bmc-vs-Core fresh IBD + serve run on dedicated SSD (live: bmc=pending core=pending)
 2026-09-04T11:28:28Z TICK bmc_alive=17 result=pending prog='7:01:09 stored 647142/965427' avg='10.9MB/s recv, 10.9MB/s write --' | core result=pending prog='' | oracle_tip=965470
 2026-09-04T11:43:31Z TICK bmc_alive=17 result=pending prog='7:16:09 stored 655446/965427' avg='10.9MB/s recv, 10.9MB/s write --' | core result=pending prog='' | oracle_tip=965472
+2026-09-04T11:58:34Z TICK bmc_alive=17 result=pending prog='7:31:20 stored 663744/965427' avg='10.9MB/s recv, 10.9MB/s write --' | core result=pending prog='' | oracle_tip=965472
