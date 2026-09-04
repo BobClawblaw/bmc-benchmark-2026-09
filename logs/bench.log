@@ -62,3 +62,4 @@ fix branch history: 2c6e989 (initial OR, failed 2 corners) -> 7481a8c (byte-floo
 2026-09-04T16:29:28Z TICK bmc_alive=17 result=pending prog='12:02:16 stored 796388/965427' avg='11.0MB/s recv, 11.0MB/s write --' | core result=pending prog='' | oracle_tip=965499
 2026-09-04T16:44:31Z TICK bmc_alive=17 result=pending prog='12:17:16 stored 801589/965427' avg='11.0MB/s recv, 11.0MB/s write --' | core result=pending prog='' | oracle_tip=965502
 2026-09-04T16:59:34Z TICK bmc_alive=17 result=pending prog='12:32:17 stored 807341/965427' avg='11.0MB/s recv, 11.0MB/s write --' | core result=pending prog='' | oracle_tip=965502
+2026-09-04T17:14:37Z TICK bmc_alive=17 result=pending prog='12:47:17 stored 812925/965427' avg='11.0MB/s recv, 11.0MB/s write --' | core result=pending prog='' | oracle_tip=965503
