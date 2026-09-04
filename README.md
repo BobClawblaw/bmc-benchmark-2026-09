@@ -1,57 +1,63 @@
-# bmc vs Bitcoin Core IBD benchmark — /mnt/2tbssd (2026-09-04)
+# bmc vs Bitcoin Core — fresh IBD + serve benchmark (2026-09-04, dedicated SSD)
 
-Status: **in progress**. bmc download phase restored to 4.6 MB/s after the
-peer-floor regression was found and fixed; Core starts after bmc finishes.
+**Status: bmc download in progress — 77% (743,085 / 965,427 blocks), 11.0 MB/s.**
+Live-updated by a 15-minute ticker; the download table below reflects the
+state as of the last tick (2026-09-04 14:15 UTC).
 
-## Layout
-- Host: 32-core Linux 7.0.0-30, 60 GB RAM, dedicated 1.8 TB SSD (ext4,
-  /dev/sdc3) mounted at /mnt/2tbssd.
-- Oracle for tip height + UTXO-set parity: a long-synced Bitcoin Core
-  v31.99 node on the same box (`gettxoutsetinfo muhash <hash>` comparison).
-- bmc: cloned from https://github.com/BobClawblaw/bitcoinmachinecode —
-  clone 8 s, build (`make daemon/bitcoind daemon/bitcoin_cli`, -j32) 8 s,
-  0 warnings.
-- Core v31.1: download 10 s (87 MB), sha256 check, extract 1 s.
-- Disk baseline: 0.40 GiB/s seq write / 0.42 GiB/s cold seq read; 4k
-  O_SYNC random-write test still running (disk is idle for this workload —
-  write rate during sync is ~5 MB/s peak).
+Setup: dedicated 1.8 TB SSD (/mnt/2tbssd, ext4), 32-core / 60 GB RAM host,
+both nodes syncing from genesis on mainnet. UTXO parity is judged against a
+long-synced Bitcoin Core v31.99 oracle on the same box via
+`gettxoutsetinfo muhash`. Ports: bmc P2P 8462 / RPC 8461; Core P2P 8563 /
+RPC 8562.
 
-## The bmc story: 15x self-inflicted slowdown, found and fixed
-1. Fresh run (commit f725cb7) reached 108k/416k blocks in 22 min but at
-   **77 KB/s aggregate** — ~3 days projected for the full chain. Per-peer
-   medians: 22/22 workers under the 32 KB/s dead-weight floor, **zero
-   evictions in 20 min**. Peer pool geo: 7×US, 3×DE, one each CA/FR/BR/RU/
-   KR/IE/HK/CN; the slowest peers (1.7–2.7 KB/s) were HKG/CHN/KOR/RUS/BRA.
-2. The cause is `93fab72` (2026-09-02), which changed the dead-weight rule
-   from a byte floor to `byte_rate < floor && blocks_this_tick < 10` to stop
-   false bans of honest tiny-block peers. The AND makes the byte floor
-   unreachable for the first ~150k blocks: 6–9 blocks/s of tiny blocks
-   clears the block check while trickling below 32 KB/s, so nothing is ever
-   evicted. (The earlier 017a83b tuning had measured 218 KB/s → 1.6 MB/s
-   from aggressive eviction; 93fab72 quietly defanged it early-chain.)
-3. A/B on the same datadir + peer pool, hole-restored 30k-block spans:
-   | rule | aggregate | evictions |
-   |---|---|---|
-   | byte floor only (pre-0902) | 1.4 MB/s, 160k blocks/240 s | 2 |
-   | current AND rule | 77 KB/s, 0 kills | 0 |
-   | block floor only (≥10 blk/s or drop) | **2.0 MB/s, 178k blocks/240 s** | 3 |
-4. Fix committed & pushed to github: `fix/dlc-peer-floor-depth` (2c6e989) —
-   OR semantics: <10 blocks/tick is dead at any depth; otherwise the byte
-   floor decides. The 0902 false-positive it was protecting against (an
-   honest tiny-block peer at 50 blk/s / 20 KB/s) still passes: block floor
-   says healthy, byte floor never runs. Re-measured live: **4.6 MB/s**, 3
-   evictions in 7 min, progress 209k blocks in 7 min.
+## Phase results
 
-## Timings so far (bmc)
-- start -> P2P listener bound: ~5 s; dns seeds + 143 peers: ~1 s more
-- headers: 416,000 in ~129 s (~3,200 hdr/s) on the fixed run (first run's
-  605 s included archive bookkeeping at a different tip)
-- blocks: 965k span at 4.6 MB/s ≈ mid-2010s data, ETA ~2.5–3 h total
-  (was ~3 days before the fix)
-- RPC is not up yet because the fixed binary still sits in boot catch-up;
-  measured live each cycle.
+| phase | bmc (fix/dlc-peer-floor-depth) | Bitcoin Core v31.1 |
+|---|---|---|
+| install | git clone 8 s + build 8 s, 0 warnings | download 10 s (87 MB) + sha256 + extract 1 s |
+| boot -> P2P listening | ~5 s | queued (starts when bmc's RESULT lands) |
+| dns seeds -> peers | +143 in ~1 s | queued |
+| headers (416k at that session's tip) | ~129 s (~3.2k hdr/s) | queued |
+| block download | **743,085/965,427 (77%), 11.0 MB/s @ 9h48m** | queued |
+| disk used (download phase) | 388 GB | queued |
+| UTXO build | not yet reached | queued |
+| RPC answering | not yet reached (download gate) | queued |
+| P2P inbound serving (stranger probe) | not yet reached | queued |
+| UTXO-served (gettxoutsetinfo live) | not yet reached | queued |
+| muhash parity vs oracle | pending at TIP | pending |
+| verdict | RESULT: pending | RESULT: pending |
 
-## Files
-- logs/: session log, bmc phase/progress/bisect/floorhunt, Core stagger
-- scripts/: install + benchmark + A/B + audit scripts used
-- analysis/PEER_ANALYSIS.md: the peer-selection audit; dlc-peer-floor-fix.patch
+Download-rate curve observed on bmc: 77 KB/s (regressed binary) -> 4.6 ->
+7.2 -> 9.1 -> 11.0 MB/s on the fixed binary as the archive deepens. 33 peer
+evictions over the run (Rule C: dead-weight rule, byte floor binding at
+every chain depth).
+
+## Headline finding — measured, fixed, re-measured
+Commit 93fab72 (2026-09-02) made the dl_catchup byte floor unreachable for
+the first ~150k blocks by AND-ing a block-rate exemption into the dead-peer
+rule. Result on a fresh install: 22/22 workers under the 32 KB/s floor with
+**zero evictions**, 77 KB/s aggregate, ~3-day projected sync. The fix (this
+branch's first commit) restores a floor that binds at every chain depth
+while keeping both false-positive guards honest — pinned by 7 corners in
+test_dialhelper. Same datadir, same peer pool: 77 KB/s -> 7.2 MB/s at
+restart, climbing to 11.0 MB/s. See worklog/2026-09-04.md (in the code
+repo), analysis/PEER_ANALYSIS.md, logs/floorhunt.log.
+
+## Pipeline (automatic from here)
+1. bmc reaches TIP -> phase log stamps RPC / UTXO-served / P2P-serve-ready,
+   muhash parity runs vs the oracle, RESULT=PASS/FAIL written.
+2. Core v31.1 auto-launches with the identical contract (never overlaps the
+   bmc run on this box).
+3. This README's table fills in with Core's phases; final consolidated
+   report pushed here and in the code repo under
+   `benchmarks/2026-09-04-ssd-bmc-vs-core/`.
+
+## Contents
+- `scripts/` — install + benchmark + A/B + audit harnesses (all bash/python,
+  self-documenting)
+- `logs/` — bench.log session log, bmc/core phase & progress, peer
+  bisect + floor-hunt measurements, 15-min tick history
+- `analysis/` — PEER_ANALYSIS.md (why every peer looked slow), the fix as a
+  .patch
+- `MEMORY.md` — durable test memory: phases measured vs pending, recovery
+  commands, ops notes
