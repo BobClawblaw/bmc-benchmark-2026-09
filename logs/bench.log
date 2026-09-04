@@ -49,3 +49,4 @@ fix branch history: 2c6e989 (initial OR, failed 2 corners) -> 7481a8c (byte-floo
 2026-09-04T13:20:36Z main-tree publish: 66922eb benchmarks: live tick (bmc=pending core=pending) 202
 2026-09-04T13:28:50Z TICK bmc_alive=17 result=pending prog='9:01:32 stored 715435/965427' avg='11.0MB/s recv, 11.0MB/s write --' | core result=pending prog='' | oracle_tip=965480
 2026-09-04T13:43:52Z TICK bmc_alive=17 result=pending prog='9:16:32 stored 724489/965427' avg='11.0MB/s recv, 11.0MB/s write --' | core result=pending prog='' | oracle_tip=965481
+2026-09-04T13:58:55Z TICK bmc_alive=17 result=pending prog='9:31:43 stored 733519/965427' avg='11.0MB/s recv, 11.0MB/s write --' | core result=pending prog='' | oracle_tip=965481
