@@ -169,3 +169,4 @@ fix branch history: 2c6e989 (initial OR, failed 2 corners) -> 7481a8c (byte-floo
 2026-09-05T19:19:31Z TICK bmc_alive=2 result=PASS  prog='' avg='' | core result=pending prog='2026-09-05T19:15:45Z core height= ' | oracle_tip=965653
 2026-09-05T19:34:33Z TICK bmc_alive=2 result=PASS  prog='' avg='' | core result=pending prog='2026-09-05T19:30:11Z core height=837350 (86.71% of oracle tip 965655) peers=9' | oracle_tip=965655
 2026-09-05T19:49:36Z TICK bmc_alive=2 result=PASS  prog='' avg='' | core result=pending prog='2026-09-05T19:45:48Z core height= ' | oracle_tip=965659
+2026-09-05T20:04:38Z TICK bmc_alive=2 result=PASS  prog='' avg='' | core result=pending prog='2026-09-05T20:01:11Z core rpc not answering (height blank)' | oracle_tip=965659
