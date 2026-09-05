@@ -105,3 +105,7 @@
 2026-09-05T17:17:31Z core height=812881 (84.18% of oracle tip 965637) peers=10
 2026-09-05T17:25:38Z core height= 
 2026-09-05T17:27:32Z core height=816963 (84.60% of oracle tip 965638) peers=10
+2026-09-05T17:35:38Z core height= 
+2026-09-05T17:37:52Z core rpc not answering (height blank)
+2026-09-05T17:45:39Z core height= 
+2026-09-05T17:47:52Z core height=823472 (85.28% of oracle tip 965645) peers=10
