@@ -1,63 +1,61 @@
 # bmc vs Bitcoin Core — fresh IBD + serve benchmark (2026-09-04, dedicated SSD)
 
-**Status: bmc download in progress — 77% (743,085 / 965,427 blocks), 11.0 MB/s.**
-Live-updated by a 15-minute ticker; the download table below reflects the
-state as of the last tick (2026-09-04 14:15 UTC).
+**Status: bmc UTXO catch-up 94% — block download GATE PASSED. Core queued.**
+Last update 2026-09-05 03:41 UTC, from live logs. The phase table below is
+the measured record; the serve-phase gates land within the hour.
 
 Setup: dedicated 1.8 TB SSD (/mnt/2tbssd, ext4), 32-core / 60 GB RAM host,
-both nodes syncing from genesis on mainnet. UTXO parity is judged against a
-long-synced Bitcoin Core v31.99 oracle on the same box via
-`gettxoutsetinfo muhash`. Ports: bmc P2P 8462 / RPC 8461; Core P2P 8563 /
-RPC 8562.
+both nodes from genesis on mainnet, UTXO parity judged against a long-synced
+Bitcoin Core v31.99 oracle (`gettxoutsetinfo muhash`). Ports: bmc P2P 8462 /
+RPC 8461; Core P2P 8563 / RPC 8562.
 
-## Phase results
+## Phase results so far
 
-| phase | bmc (fix/dlc-peer-floor-depth) | Bitcoin Core v31.1 |
+| phase | measured | timestamp (UTC) |
 |---|---|---|
-| install | git clone 8 s + build 8 s, 0 warnings | download 10 s (87 MB) + sha256 + extract 1 s |
-| boot -> P2P listening | ~5 s | queued (starts when bmc's RESULT lands) |
-| dns seeds -> peers | +143 in ~1 s | queued |
-| headers (416k at that session's tip) | ~129 s (~3.2k hdr/s) | queued |
-| block download | **743,085/965,427 (77%), 11.0 MB/s @ 9h48m** | queued |
-| disk used (download phase) | 388 GB | queued |
-| UTXO build | not yet reached | queued |
-| RPC answering | not yet reached (download gate) | queued |
-| P2P inbound serving (stranger probe) | not yet reached | queued |
-| UTXO-served (gettxoutsetinfo live) | not yet reached | queued |
-| muhash parity vs oracle | pending at TIP | pending |
-| verdict | RESULT: pending | RESULT: pending |
+| install (bmc) | clone 8 s + build 8 s, 0 warnings | 02:40 |
+| boot -> P2P inbound listening | ~5 s (served peers throughout the entire sync) | 04:23 |
+| dns seeds -> 143 candidate peers | +1 s | 04:23 |
+| headers 416k | ~129 s (~3.2k hdr/s) | 04:25 |
+| **block download (GATE 1)** | **719,257 blocks in 70,211 s (~19.5 h), 11.1 MB/s sustained flat**, ~1 TB archive | done 23:53:35 |
+| **RPC bound + cookie (GATE 2)** | 8461 live, .cookie 0600, within 0.5 s of the download gate closing | 23:53:35 |
+| P2P inbound accepts | 101 accepted during sync (serve children fork+answer) | continuous |
+| **UTXO bulk catch-up (GATE 3)** | 906,356 / 965,539 (93.9%), avg 67 blk/s, mid-catchup background compaction (14 runs -> 1 in 58 s), ~30 GB RSS peak | running |
+| coinstats adopted (GATE 4) | pending (ETA <15 min) | — |
+| TIP + muhash parity vs oracle (GATE 5) | pending | — |
+| verdict | RESULT: pending | — |
+| Bitcoin Core v31.1 full run | queued — auto-launches at bmc RESULT, same contract, never overlapping | — |
 
-Download-rate curve observed on bmc: 77 KB/s (regressed binary) -> 4.6 ->
-7.2 -> 9.1 -> 11.0 MB/s on the fixed binary as the archive deepens. 33 peer
-evictions over the run (Rule C: dead-weight rule, byte floor binding at
-every chain depth).
+Notes on the download gate: 11.1 MB/s was flat across the entire span
+(early tiny-block chain and the fat modern span) — the binding constraint
+after the peer-floor fix was link/peer quality, not disk (0.4 GiB/s SSD) or
+CPU. The pre-fix binary on the identical datadir/pool: 77 KB/s with 22/22
+workers stuck under the eviction floor and zero evictions — a ~140x
+difference. See analysis/PEER_ANALYSIS.md, logs/floorhunt.log, and the
+worklog entry in the code repo.
 
 ## Headline finding — measured, fixed, re-measured
-Commit 93fab72 (2026-09-02) made the dl_catchup byte floor unreachable for
-the first ~150k blocks by AND-ing a block-rate exemption into the dead-peer
-rule. Result on a fresh install: 22/22 workers under the 32 KB/s floor with
-**zero evictions**, 77 KB/s aggregate, ~3-day projected sync. The fix (this
-branch's first commit) restores a floor that binds at every chain depth
-while keeping both false-positive guards honest — pinned by 7 corners in
-test_dialhelper. Same datadir, same peer pool: 77 KB/s -> 7.2 MB/s at
-restart, climbing to 11.0 MB/s. See worklog/2026-09-04.md (in the code
-repo), analysis/PEER_ANALYSIS.md, logs/floorhunt.log.
+93fab72 (2026-09-02) made the dl_catchup byte floor unreachable for the
+first ~150k blocks via a block-rate exemption AND-joined into the dead-peer
+rule; fresh installs could not evict anything. The shipped fix (this
+repo's first commit, `download workers: the byte floor binds at every chain
+depth`) restores a depth-honest floor pinned by 7 test corners. Follow-up
+work (EMA speed-ranked peer selection) is implemented and test-green, held
+locally pending upstream merge.
 
 ## Pipeline (automatic from here)
-1. bmc reaches TIP -> phase log stamps RPC / UTXO-served / P2P-serve-ready,
-   muhash parity runs vs the oracle, RESULT=PASS/FAIL written.
-2. Core v31.1 auto-launches with the identical contract (never overlaps the
-   bmc run on this box).
-3. This README's table fills in with Core's phases; final consolidated
-   report pushed here and in the code repo under
-   `benchmarks/2026-09-04-ssd-bmc-vs-core/`.
+1. GATE 3 completes (~03:55 UTC) -> GATE 4 coinstats -> GATE 5 TIP + muhash
+   parity -> RESULT.
+2. Core v31.1 auto-launches (fresh datadir, same phase contract).
+3. Final consolidated report (all gates, both nodes, parity verdicts)
+   replaces the tables above; the code-repo copy under
+   `benchmarks/2026-09-04-ssd-bmc-vs-core/` refreshes from the same logs.
 
 ## Contents
-- `scripts/` — install + benchmark + A/B + audit harnesses (all bash/python,
-  self-documenting)
-- `logs/` — bench.log session log, bmc/core phase & progress, peer
-  bisect + floor-hunt measurements, 15-min tick history
-- `analysis/` — PEER_ANALYSIS.md (why every peer looked slow), the fix as a
-  .patch
-- `MEMORY.md` — durable test memory: phases measured vs pending, recovery
-  commands, ops notes
+- `scripts/` — install + benchmark + A/B + audit harnesses
+- `logs/` — session log, phase/progress logs, bisect + floor-hunt data,
+  15-min tick history (ticks carry the full rate history)
+- `analysis/` — PEER_ANALYSIS.md (root-cause audit), PEER_PLAN.md (EMA
+  selection design, implemented), ASSUMEUTXO_PLAN.md, the fix as .patch
+- `PERF_PLAN.md` — ranked program vs Core with live status
+- `MEMORY.md` — durable test memory + recovery commands

@@ -1,0 +1,9 @@
+2026-09-04T14:36:16Z catchup_done  ::  
+2026-09-04T14:36:16Z worker_start  ::  
+2026-09-04T14:36:16Z bulk_mode  ::  2026-09-04 04:23:24.009 [config] utxo : dbcache=8192MB -> bulk_slots=2^25 bulk_blob=6144MB bulk_gap=50000 compact_at=12
+2026-09-04T14:36:16Z utxo_init  ::  
+2026-09-04T14:36:16Z utxo_catchup_done  ::  
+2026-09-04T14:36:16Z cookie  ::  
+2026-09-04T14:36:17Z rpc_bound  ::  
+2026-09-04T14:36:17Z keepup_hb  ::  
+2026-09-04T14:36:17Z serving  ::  
