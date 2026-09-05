@@ -31,3 +31,9 @@ built
 2026-09-05T00:38:56Z MON: PHASE first 'utxo_live\] init': 2026-09-04 23:53:36.638 [utxo_live] init dir=/mnt/2tbssd/bmc-bench/data/main slots=2^25 fresh applied_height=-1 manifest_n=0 live=0 elapsed=72932s
 2026-09-05T00:43:57Z MON: PHASE first 'cookie authentication': 2026-09-04 23:53:35.722 [rpc] no rpcuser/rpcpassword -- using cookie authentication elapsed=73233s
 2026-09-05T00:43:57Z MON: PHASE first 'utxo_live\] init': 2026-09-04 23:53:36.638 [utxo_live] init dir=/mnt/2tbssd/bmc-bench/data/main slots=2^25 fresh applied_height=-1 manifest_n=0 live=0 elapsed=73233s
+2026-09-05T00:49:02Z MON: PHASE first 'cookie authentication': 2026-09-04 23:53:35.722 [rpc] no rpcuser/rpcpassword -- using cookie authentication elapsed=73538s
+2026-09-05T00:49:02Z MON: PHASE first 'utxo_live\] init': 2026-09-04 23:53:36.638 [utxo_live] init dir=/mnt/2tbssd/bmc-bench/data/main slots=2^25 fresh applied_height=-1 manifest_n=0 live=0 elapsed=73538s
+2026-09-05T00:54:05Z MON: PHASE first 'cookie authentication': 2026-09-04 23:53:35.722 [rpc] no rpcuser/rpcpassword -- using cookie authentication elapsed=73841s
+2026-09-05T00:54:05Z MON: PHASE first 'utxo_live\] init': 2026-09-04 23:53:36.638 [utxo_live] init dir=/mnt/2tbssd/bmc-bench/data/main slots=2^25 fresh applied_height=-1 manifest_n=0 live=0 elapsed=73841s
+2026-09-05T00:59:07Z MON: PHASE first 'cookie authentication': 2026-09-04 23:53:35.722 [rpc] no rpcuser/rpcpassword -- using cookie authentication elapsed=74143s
+2026-09-05T00:59:07Z MON: PHASE first 'utxo_live\] init': 2026-09-04 23:53:36.638 [utxo_live] init dir=/mnt/2tbssd/bmc-bench/data/main slots=2^25 fresh applied_height=-1 manifest_n=0 live=0 elapsed=74143s
