@@ -1,0 +1,39 @@
+--- a/asm/daemon/serve_child.c
++++ b/asm/daemon/serve_child.c
+@@ lines 101-108: the store-open block (REPRODUCED live 2026-09-05 05:00 UTC:
+   a fresh inbound peer connect logged "FATAL: store_init failed after 3
+   attempts" here and the child died. The server survived; that peer got no
+   answer. Every failing inbound connection burns a fork and answers nothing.
+   Three retries of a deterministic failure is a bug on its own — and the
+   failure carries no errno.) @@
+     if(store_init(store_buf)!=0){
+         usleep(50000);
+         if(store_init(store_buf)!=0){
+             usleep(100000);
+             if(store_init(store_buf)!=0){
+-                fprintf(stderr,"FATAL: store_init failed after 3 attempts\n");
+-                _exit(1);
++                /* SC-1 (2026-09-05, benchmark run): diagnose before dying.
++                 * store_init is asm (bitcoin_store) and its failure path is
++                 * opaque from here; capture what a C caller CAN see, then
++                 * fail this child only. Two changes:
++                 *   (a) log errno plus the datadir-relative files store_init
++                 *       opens (index.dat, headers.dat, blk*.dat dir state):
++                 *       the failure is deterministic per-peer, so the errno
++                 *       will name it (mmap ENOMEM under the worker's 30GB
++                 *       footprint? EMFILE per-child fd limits? a lock?) —
++                 *   (b) the retry cadence (50ms/100ms) assumes a transient;
++                 *       for anything deterministic it is wasted forks. Keep
++                 *       the retries (a torn close from the parent can be
++                 *       transient) but log each attempt so the pattern is
++                 *       visible in the console log. */
++                int e1 = errno;
++                struct stat sidx; int have_idx = (stat("index.dat", &sidx)==0);
++                fprintf(stderr,"FATAL: store_init failed after 3 attempts "
++                               "(errno=%d %s; index.dat present=%d size=%lld)\n",
++                        e1, strerror(e1), have_idx,
++                        (long long)(have_idx ? sidx.st_size : -1));
++                _exit(1);
+             }
+         }
+     }

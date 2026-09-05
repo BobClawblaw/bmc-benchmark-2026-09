@@ -1,0 +1,32 @@
+--- a/asm/bitcoin_utxo_lsm.asm
++++ b/asm/bitcoin_utxo_lsm.asm
+@@ utxo_lsm_reload_ro's WAL open (the O_RDONLY open near its head) @@
+     ; RPC-3 (2026-09-05, /mnt/2tbssd benchmark): the READ-ONLY reload opens
+     ; the WAL O_RDONLY already (never utxo.idx -- that is the whole point of
+     ; the _ro variant), but the drain loop then takes the writer slot to
+     ; rebuild the memtable, exactly like the rw reload. On a live datadir
+     ; with the download worker mid-flush that drain cannot finish, and every
+     ; _ro caller -- the gettxoutsetinfo RPC path and every offline tool
+     ; (utxo_setinfo --muhash, utxo_dump_keys, utxo_probe_one) -- either
+     ; waited indefinitely inside the drain or saw the caller-side exit(1).
+     ;
+     ; The fix is NOT a lock. reload_ro rebuilds the memtable by replaying the
+     ; WAL and committed runs; it does not need to DRAIN concurrently with the
+     ; writer if it replays against a stable snapshot. Approach: open the WAL
+     ; O_RDONLY AND the manifest read-only, replay every run + the WAL tail
+     ; with the generation/offsets the manifest carries, and return -1 only on
+     ; a genuine format error. The invariant that makes this safe on a live
+     ; store: the WAL and run files are append-only while a generation is
+     ; live -- the compactor never truncates the WAL until the writers rotate
+     ; generations, so a read-only replay of [manifest runs + WAL up to
+     ; log_len captured at open] is a consistent snapshot. Callers tolerate
+     ; a slightly stale set (a set-info hash can be milliseconds behind; the
+     ; node's own applied height is reported from utxo_applied_height.dat).
+     ;
+     ; NOTE to the implementing session: this is an asm change; reproduce the
+     ; snapshot semantics with a REGTEST harness (test_utxo_lsm_reload_ro)
+     ; that hammers a writer and a reload_ro concurrently and asserts (a) no
+     ; hang, (b) every key present in the snapshot was durably WAL'd before
+     ; open. If the snapshot path is too invasive for asm in this round, the
+     ; interim step is the caller-side deadline (RPC-1) so a blocked reload_ro
+     ; at least returns "rpcservertimeout" instead of hanging an RPC worker.

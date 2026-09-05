@@ -1,0 +1,28 @@
+--- a/asm/daemon/main.c
++++ b/asm/daemon/main.c
+@@ txoq_serve_one (~line 1382): the reload cadence block. REPRODUCTION
+  2026-09-05 04:56-05:0x: the daemon was stopped, WAL drained at boot, the
+  worker reloaded the 30GB WAL tail once (several minutes), and after it
+  reached keep-up, EVERY gettxout IPC still answered "not ready": the 60s
+  cadence reloads utxo_lsm_reload() again — and each reload re-drains a WAL
+  that is ~500MB+ of already-committed-but-uncompacted records (the memtable
+  is bulk-sized during catch-up, so flushes are rare by design), minutes per
+  cycle, forever. The IPC never answers on a freshly-restarted node until
+  compaction shrinks the WAL. @@
+     if(t - g_txoq_last_reload >= 60){
+-        extern void utxo_live_reload_parent_view(void);
+-        utxo_live_reload_parent_view();
++        /* TXOQ-1: cadence reload must not re-drain a huge WAL every cycle.
++         * Fix (pick with the store owner):
++         *  (a) reload only when the WAL tail grew by < N bytes since the last
++         *      reload AND the drain is estimated cheap (st_size small); or
++         *  (b) compact the WAL before reload when st_size > threshold (the
++         *      background compaction child already exists); or
++         *  (c) move gettxout answering into the worker itself on its service
++         *      point (the worker HAS the live set; a poll in its apply loop
++         *      answers gettxout with zero reload — the comment above this
++         *      function already describes the construction guarantee that
++         *      makes this safe). (c) is the correct end-state; (a) is the
++         *      one-line interim. */
+         g_txoq_last_reload = t;
+     }
