@@ -122,3 +122,4 @@ fix branch history: 2c6e989 (initial OR, failed 2 corners) -> 7481a8c (byte-floo
 2026-09-05T07:32:01Z TICK bmc_alive=2 result=PASS  prog='' avg='' | core result=pending prog='2026-09-05T07:25:00Z core height= ' | oracle_tip=965583
 2026-09-05T07:47:04Z TICK bmc_alive=2 result=PASS  prog='' avg='' | core result=pending prog='2026-09-05T07:45:01Z core height= ' | oracle_tip=965584
 2026-09-05T08:02:08Z TICK bmc_alive=2 result=PASS  prog='' avg='' | core result=pending prog='2026-09-05T07:55:01Z core height= ' | oracle_tip=965586
+2026-09-05T08:17:11Z TICK bmc_alive=2 result=PASS  prog='' avg='' | core result=pending prog='2026-09-05T08:15:03Z core height= ' | oracle_tip=965588
