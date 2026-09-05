@@ -165,3 +165,6 @@
 2026-09-05T22:22:29Z core rpc not answering (height blank)
 2026-09-05T22:25:59Z core height= 
 2026-09-05T22:32:29Z core height=884951 (91.64% of oracle tip 965677) peers=10
+2026-09-05T22:35:59Z core height= 
+2026-09-05T22:42:29Z core height=889116 (92.07% of oracle tip 965680) peers=10
+2026-09-05T22:46:00Z core height= 
