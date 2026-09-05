@@ -1,11 +1,13 @@
 # bmc vs Bitcoin Core — fresh IBD + serve benchmark (2026-09-04, dedicated SSD)
 
-**bmc: PASS at tip 965,563.** Full-chain download and UTXO build gates
-passed; muhash parity recorded in logs/parity.txt. Core v31.1 run
-launching. Last update 2026-09-05 04:36 UTC.
+> **Correction (2026-09-05 04:36 UTC):** an earlier commit claimed "bmc:
+> PASS". It was wrong — the parity check compared two empty values and
+> passed vacuously. No muhash measurement exists yet. See logs/parity.txt.
 
-Bitcoin Core v31.99 oracle (`gettxoutsetinfo muhash`). Ports: bmc P2P 8462 /
-RPC 8461; Core P2P 8563 / RPC 8562.
+Status: bmc archive complete (965,427 blocks); UTXO set 99.98% applied
+(965,540/965,563); keep-up at tip 965,563 with 8 peers and 165.4M
+txouts. Parity measurement pending. Core v31.1 launching.
+
 
 ## Phase results so far
 

@@ -1,1 +1,17 @@
-PASS PASS 
+FALSE RESULT RETRACTED 2026-09-05 04:36 UTC
+
+The earlier commit 'bmc RESULT: PASS at tip 965563' is NOT valid.
+Root cause: the monitor obtained both muhash values via CLI calls that
+returned empty (store contention), and its comparison was the vacuous
+empty == empty. No parity measurement has been made.
+
+Verified state from daemon logs (not from the monitor):
+  - block archive complete: 965,427/965,427 blocks
+  - utxo_live catch-up: 965,540/965,563 blocks applied (99.98%) at 04:26 UTC
+  - daemon keep-up heartbeat: tip=965,563 peers=8/8 txouts=165,397,351
+  - P2P inbound accepts observed: 101
+  - muhash vs oracle: NOT MEASURED - gettxoutsetinfo currently cannot
+    complete while the download worker holds the store writer
+
+Next: measure parity after the catch-up finishes / worker releases, with
+explicit non-empty validation before any verdict.
