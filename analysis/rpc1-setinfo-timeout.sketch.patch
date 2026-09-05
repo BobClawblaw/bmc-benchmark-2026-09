@@ -1,0 +1,21 @@
+--- a/asm/daemon/rpc_commands.c
++++ b/asm/daemon/rpc_commands.c
+@@
++/* RPC-1 (2026-09-05): bound the gettxoutsetinfo walk against the request
++ * deadline (rpc_deadline_expired, set from rpcservertimeout at dispatch).
++ * A 165M-coin walk on this LSM is minutes; under store contention it is
++ * longer, and the old code simply never returned — the benchmark's parity
++ * gate died exactly here. With a deadline the caller gets Core's behavior:
++ * a completed hash, or a loud RPC_INTERNAL_ERROR "operation timed out".
++ * The walk is a pure read, so abandoning it mid-scan is safe: no writer
++ * state is held by the reader; the per-entry iteration re-enters the LSM
++ * probes, which are themselves lock-free against the WAL writer. */
+     extern int rpc_deadline_expired(void);
+@@ inside the set-info walk's per-entry loop, before the muhash accumulate: @@
++        if (rpc_deadline_expired()) { rc = -9; break; }   /* -9 = caller reports timeout */
+@@ and at the reply site: @@
++    if (rc == -9)
++        return rpc_errorf(RPC_INTERNAL_ERROR,
++                          "gettxoutsetinfo: operation exceeded rpcservertimeout; "
++                          "try height-restricted form once coinstatsindex is adopted "
++                          "(see benchmarks/2026-09-04-ssd-bmc-vs-core analysis)");

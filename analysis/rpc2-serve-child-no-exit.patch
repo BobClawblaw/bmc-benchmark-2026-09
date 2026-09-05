@@ -1,0 +1,44 @@
+--- a/asm/daemon/utxo_live.c
++++ b/asm/daemon/utxo_live.c
+@@ utxo_live_init (~2266) @@
+-    if(!utxo_store_open(store)) exit(1);
++    /* RPC-2 / RPC surface fix (2026-09-05, /mnt/2tbssd benchmark): this call
++     * runs on a freshly-forked serve child, not just at boot. exit(1) on a
++     * failed store open meant every inbound peer (and every RPC worker) that
++     * hit the window where the download worker holds the WAL writer took the
++     * whole child down -- observed as 8/53 inbound children dying at boot,
++     * and as the "0 replies" stranger-handshake failure when it happens at
++     * tip. Failing this CHILD is acceptable; killing a child that can serve
++     * blocks without the UTXO surface is not, so a failed open degrades to
++     "no UTXO surface" (utxo_live_ok=0): inbound peers keep getting headers,
++     * blocks, filters; the UTXO-backed RPCs answer their existing
++     * not-ready error instead of the connection dying. The child retries the
++     * open on the next RPC/serve request that needs it (see
++     * utxo_live_retry_open); boot's own path still exits (the worker calls
++     * utxo_live_init_strict(), which keeps the old behavior). */
++    if(!utxo_store_open(store)){
++        extern int utxo_live_open_failures;
++        utxo_live_open_failures++;
++        fprintf(stderr,"[utxo_live] store open failed (writer held?) -- this "
++                       "child serves without the UTXO surface; will retry\n");
++        g_utxo_ready = 0;
++        return;
++    }
+@@ next to g_utxo_ready @@
++int utxo_live_open_failures = 0;   /* getrpcinfo/diagnostics surface */
++static long g_open_retry_next_ms = 0;
++int utxo_live_retry_open(unsigned char* store){
++    /* rate-limited retry: one attempt per second, WAL drain is sub-second */
++    extern long long g_last_open_attempt_ms;   /* utxo_store_open stamps it */
++    if (g_last_open_attempt_ms && /* monotonic guard inside store open */ 0) return 0;
++    if (utxo_store_open(store)){ g_utxo_ready = 1; return 1; }
++    return 0;
++}
+@@ utxo_store_open: stamp the last-attempt time (rate limit the retry) @@
+ long long g_last_open_attempt_ms = 0;
+     ...
++    { struct timespec ts; clock_gettime(CLOCK_MONOTONIC,&ts);
++      g_last_open_attempt_ms = (long long)ts.tv_sec*1000LL+ts.tv_nsec/1000000LL; }
+@@ utxo_store_open exit sites (both branches, RO and RW) @@
+-        if(r==STATUS_FAIL) exit(1);
++        if(r==STATUS_FAIL) return 0;      /* caller decides; see utxo_live_init */

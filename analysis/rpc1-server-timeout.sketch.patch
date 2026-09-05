@@ -1,0 +1,33 @@
+--- a/asm/daemon/rpc_server.c
++++ b/asm/daemon/rpc_server.c
+@@
+-/* rpc_server.c worker pool */
++/* rpc_server.c worker pool */
++#include <time.h>
++
++/* RPC-1 (2026-09-05, found by the /mnt/2tbssd benchmark): a handler with no
++ * bound -- gettxoutsetinfo walking 165M coins while the download worker
++ * churns the LSM, or any handler blocking on a store read held by the
++ * writer -- parks a worker thread forever. With rpcthreads=16 it takes 16
++ * stuck calls to black out the RPC surface, and the client side (the
++ * benchmark monitor) then sees an empty reply and declares the gate
++ * indeterminate. The server now stamps a deadline into each request context
++ * at dispatch (rpcservertimeout, default 30s) and handlers that can run
++ * long poll it: see rpc_deadline_expired() and the gettxoutsetinfo walk.
++ * The client-visible contract matches Core: a slow gettxoutsetinfo answers
++ * within the timeout or returns RPC_INTERNAL_ERROR "operation timed out",
++ * never a silent hang. */
++static _Thread_local long long g_rpc_deadline_ms = 0;
++static long long rpc_now_ms(void){
++    struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts);
++    return (long long)ts.tv_sec*1000LL + ts.tv_nsec/1000000LL;
++}
++void rpc_set_deadline(int timeout_s){
++    g_rpc_deadline_ms = timeout_s > 0 ? rpc_now_ms() + (long long)timeout_s*1000LL : 0;
++}
++int rpc_deadline_expired(void){
++    return g_rpc_deadline_ms != 0 && rpc_now_ms() > g_rpc_deadline_ms;
++}
+@@ rpc dispatch (worker thread, before calling the command handler) @@
++    rpc_set_deadline(g_timeout_s);     /* g_timeout_s = cfg->timeout_s at start */
+     r = rpc_dispatch(method, params, &result);

@@ -1,0 +1,20 @@
+--- a/asm/daemon/rpc_server.c
++++ b/asm/daemon/rpc_server.c
+@@ worker run(): the call to rpc_http_run(c, g_timeout_s, handler) at ~line 883 @@
+-    rpc_http_run(c, g_timeout_s, handler);
++    rpc_http_run(c, g_timeout_s, handler);
++    /* note: g_timeout_s is already plumbed to BOTH the socket read path
++     * (rpc_http_conn_set_timeout) and the per-connection deadline check in
++     * rpc_http_read_and_run — rpcservertimeout works for connection/IO
++     * stalls. What it does NOT do (the actual 2026-09-05 benchmark finding)
++     * is bound the HANDLER: rpc_http_run returns r = handler(...) with no
++     * wall-clock guard around that call, so a gettxoutsetinfo walking 165M
++     * coins, or a handler blocked on the store-open exit(0) path, parks a
++     * worker thread indefinitely. Handlers can block in arbitrary C code;
++     * SIGALRM would interrupt reads, not a CPU-bound walk, and killing the
++     * thread leaks the connection. So the timeout for LONG handlers must be
++     * cooperative: the deadline is set per request here, and long-walking
++     * handlers (gettxoutsetinfo today; scanmempool/wallet rescans when they
++     * move on this node) poll rpc_deadline_expired() in their item loops. */
++    /* deadline was set before handler dispatch: */
++    /* rpc_set_deadline(g_timeout_s); see rpc_deadline.c below */

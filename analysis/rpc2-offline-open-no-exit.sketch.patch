@@ -1,0 +1,30 @@
+--- a/asm/daemon/main.c
++++ b/asm/daemon/main.c
+@@ utxo_store_open (~line 2266) @@
+-    if(r==STATUS_FAIL) exit(1);
++    /* RPC-2 / OFFLINE-1 (2026-09-05, found by the /mnt/2tbssd benchmark):
++     * STATUS_FAIL from utxo_lsm_open means the WAL drain cannot proceed
++     * (the download worker holds the writer slot) -- or any open failure.
++     * exit(1) in that path was written for the boot caller (fail fast at
++     * startup is right) but the function is now reached from read-only
++     * paths: the gettxoutsetinfo RPC handler and the utxo_setinfo offline
++     * tool. Killing the daemon because a READ could not open is strictly
++     * worse than the hang it was meant to avoid: a hung RPC stalls a worker
++     * thread, a dead daemon loses the node. Fail the open instead:
++     * the RPC replies the error (the timeout path RPC-1 covers it), the
++     * offline tool exits with its own code. Callers that DO want the boot
++     * behavior keep it via utxo_store_open_or_die(). */
++    if(r==STATUS_FAIL){
++        if (g_store_open_strict) exit(1);
++        fprintf(stderr,"[utxo] store open failed (WAL held by writer?) -- failing this open only\n");
++        return 0;
++    }
+@@ add next to the store globals @@
++/* Strict mode (exit on open failure) is the BOOT path's contract only. */
++int g_store_open_strict = 0;
+@@ utxo_store_init (~line 1888, the boot caller) @@
++    g_store_open_strict = 1;   /* boot: fail fast, systemd restarts */
+     if(!utxo_store_open(store)) exit(1);
+@@ utxo_store_open_ro if it shares the same exit path @@
++    (ro path: already non-strict via the flag above -- verify no exit(1)
++     remains in the ro variant; grep utxo_store_open_ro)
