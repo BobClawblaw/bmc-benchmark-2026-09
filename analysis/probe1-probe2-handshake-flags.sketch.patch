@@ -1,0 +1,36 @@
+--- a/validation/p2p_inbound_probe.py
++++ b/validation/p2p_inbound_probe.py
+@@ version_payload (~line 69) @@
+ def version_payload(magic):
+-    return (struct.pack('<iQq', 70016, 9, int(time.time()))
+-            + b'\x00'*26 + b'\x00'*26
+-            + struct.pack('<Q', 0x1234) + b'\x00'
+-            + struct.pack('<i', 0) + b'\x01')
++    # PROBE-1 (2026-09-05, bmc-vs-Core benchmark): the relay flag lives in
++    # THIS trailing byte and was 0x01 = relay=true. A relaying probe with a
++    # zeroed addr_recv is a full node, and Core's version handler drops a
++    # non-connectible (RTP_NOTHING_REQUIRED) peer that relays -- after
++    # writing version+verack but BEFORE processing them, so the probe saw
++    # frames on the wire yet "handshake failed"/empty reports. The probe is
++    # an observer: it must not request relay. relay=false is what a real
++    # block-download-only client sends (bmc's own outbound legs use it).
++    return (struct.pack('<iQq', 70016, 9, int(time.time()))
++            + b'\x00'*26 + b'\x00'*26
++            + struct.pack('<Q', 0x1234) + b'\x00'
++            + struct.pack('<i', 0) + b'\x00')
+@@ main (~line 163) @@
+     host, port, magic = sys.argv[1], int(sys.argv[2]), sys.argv[3]
++    # PROBE-2: f9beb4d9 as bytes.fromhex("f9beb4d9") yields the bytes
++    # f9 be b4 d9, which is the network field on the wire (uint32 LE of
++    # 0xd9b4bef9). Passing it "reversed" -- which an operator reasonably
++    # tries after a handshake timeout -- sends d9 be b4 f9, and every node
++    # (Core and bmc alike) disconnects instantly with no log line: the
++    # "bmc ignores strangers" false finding of the 2026-09-04 run. Refuse
++    # the reversed form loudly instead of letting it masquerade as a node
++    # defect.
++    if magic.lower() == 'd9beb4f9':
++        print("magic is BYTE-REVERSED mainnet (d9 be b4 f9). "
++              "Use f9beb4d9 -- bytes.fromhex gives wire order directly. "
++              "(A reversed magic makes every node disconnect you with no "
++              "log line -- it is NOT a node failure.)", file=sys.stderr)
++        sys.exit(2)
