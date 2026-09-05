@@ -13,7 +13,7 @@
 | RPC + cookie | **PASS** | bound within 0.5s of dl_catchup end |
 | P2P inbound serving | **PASS** | 101 inbound accepts during sync; 8/8 peers at tip |
 | muhash parity vs oracle | **PASS** | height 965,565: muhash 82806157...b6f44, txouts 165,395,754, bogosize 12,956,193,608 — identical to Core v31.99 (logs/parity.txt) |
-| stranger-handshake probe (post-sync) | **FAIL** | 0 replies to probe despite 8/8 peers — logged as finding #2 |
+| stranger-handshake probe (post-sync) | **RETIRED — was a probe bug** | root-caused 2026-09-05: probe never answered ping, node timed it out ~72s mid-drain (reproduced on bmc AND Core). Tool fixed on main (1596697); re-run vs live bmc: full report — handshake ok, ping→pong, getaddr→addr, headers/inv/notfound x4, wtxidrelay+sendaddrv2 accepted. bmc answers frame-for-frame like Core. |
 
 Open issues found by this benchmark (real, filed in logs/parity.txt): (1)
 store read-open hangs while the download worker holds the writer; (2) no
