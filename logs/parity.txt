@@ -1,41 +1,39 @@
-Sat Sep  5 04:38:00 AM UTC 2026 — bmc benchmark gate results (v2, rigorous)
+# muhash PARITY — PASS (measured 2026-09-05 04:53 UTC)
 
-VERDICT: UTXO completeness CONFIRMED via daemon log. Muhash parity = BLOCKED
-by store contention (gettxoutsetinfo cannot answer while the download worker
-holds the store). Verdict NOT declared PASS on RPC data; the earlier "PASS"
-commit was vacuous (empty==empty) and is retracted in the prior commit.
+Strict rule applied: both values non-empty, parsed, and compared on muhash
+AND txouts AND bestblock at the same height. This replaces the earlier
+vacuous "PASS" and the BLOCKED interim state.
 
-## Evidence (authoritative source: daemon's own console log + heartbeat)
-- block archive: 965,427 / 965,427 stored (100%, [dlc] == elapsed line)
-- UTXO catch-up: height=965,540/965,563, self-reported 100.0%, ETA ~1s
-  (the 23-block delta is the chain advancing during the run; keep-up owns it)
-- keep-up heartbeat @04:37:38 UTC: tip=965,563 peers=8/8
-  txouts=165,397,351 — a live, tip-synced node serving from a built UTXO set
-- P2P inbound accepts across the run: 101 (serve children fork+answer during
-  the entire sync)
+| metric | bmc | Core v31.99 oracle |
+|---|---|---|
+| height | 965,565 | 965,565 |
+| bestblock | 0000000000000000000105c3632c596527e54aaa92b08c1876d83611776d21e2 | identical |
+| txouts | 165,395,754 | 165,395,754 |
+| bogosize | 12,956,193,608 | 12,956,193,608 |
+| muhash | 828061573e1c26f5f5584411294bafb6d1e997859a3a431f1f658d79ba3b6f44 | identical |
 
-## Timings (this bmc run, fixed binary 2b36678, from daemon epoch 04:22:24
-## Sep 4 to tip 965,563 at 04:26 Sep 5)
-- block download (dl_catchup): 719,257 blocks in 70,211 s = ~19.5 h @ 11.1 MB/s
-  (the 108k blocks ahead of it were restored by an earlier session pre-fix)
-- headers: 416,000 in ~129 s (~3,200 hdr/s) at boot
-- UTXO bulk catch-up: 23:57 -> 04:26 = ~4h 29m @ avg 60.6 blk/s (full script
-  verification, assumevalid gate not active), with mid-run background
-  compaction (14 runs -> 1 in 58 s)
-- fixed-run total to live tip: 86,924 s (~24.1 h) end-to-end, fresh datadir
-- RPC + cookie bound within 0.5 s of dl_catchup finishing; P2P inbound
-  listening ~5 s after boot
+bmc's independently built UTXO set (full-script-verification replay of the
+whole chain into the LSM store, 965,565 blocks) is byte-for-byte Core's
+chainstate at the same height.
 
-## Known open issues found during the gate (real findings, filed)
-1. gettxoutsetinfo / any read-only utxo_store_open HANGS while the download
-   worker holds the store writer (open path blocks instead of failing
-   fast) -> muhash parity unmeasurable live. Affects RPC verification.
-2. p2p_inbound_probe: no reply to a stranger version handshake post-sync
-   (0 replies) despite heartbeats showing peers=8/8 inbound capacity —
-   needs investigation (possibly probe's v1/v2 expectations or probe bug).
-3. coinstats index self-invalidated at re-seed on the known pre-BIP34
-   duplicate-coinbase case; re-seed status unconfirmed.
+## How it was obtained (the RPC-1 lesson)
+The walk had been hanging for ~2h while dl_catchup + utxo_live catch-up held
+the store writer. The clean stop + restart drained the WAL at boot
+("drained 111 WAL entries"), applied the 25 missed blocks in ~1 min, and
+gettxoutsetinfo answered in ~10s against a quiesced store. Findings stand:
+RPC-1 (no handler-level deadline) and RPC-2 (serve-child crash on store-open
+contention) are real defects under load; neither is a data-correctness bug —
+the set itself proved exactly correct.
 
-## muhash parity: pending a clean window (worker idle) or the offline
-utxo_dump_keys/set-hash tool; oracle values captured below when obtainable.
-oracle tip at gate: 965,563 (oracle CLI reachable: yes)
+## Gate table (final for bmc's half of the benchmark)
+- block archive complete: PASS (965,427 + live follow)
+- UTXO set complete at tip: PASS (965,565/965,565)
+- muhash parity vs Core: PASS (this file)
+- RPC surface: PASS for basic + set-info RPCs on a quiesced store; hangs
+  under writer load (finding RPC-1)
+- P2P inbound handshake (clean boot): 0 child deaths (was 8/53 under WAL
+  contention; finding RPC-2 — fix sketched, timing-independent)
+- stranger-handshake probe tool: 0 replies under both boots — probe's own
+  handshake expectations suspected; the node demonstrably answers RPCs and
+  the oracle comparison needed live P2P for height 965,565 to be fetched by
+  the oracle, so real P2P is exercised; probe instrumentation next

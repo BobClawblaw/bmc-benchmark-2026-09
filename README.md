@@ -5,14 +5,14 @@
 > follows a strict rule: a gate passes only on non-empty, parsed, matching
 > evidence; otherwise it is reported BLOCKED or INCONCLUSIVE.
 
-**bmc gates (rigorous, 2026-09-05 04:38 UTC):**
+**bmc gates (rigorous, final: 2026-09-05 04:53 UTC):**
 | gate | result | evidence |
 |---|---|---|
 | block archive complete | **PASS** | 965,427/965,427 stored |
 | UTXO set complete | **PASS** | catch-up 965,540/965,563 self-reported 100%; keep-up heartbeat tip=965,563 txouts=165,397,351 |
 | RPC + cookie | **PASS** | bound within 0.5s of dl_catchup end |
 | P2P inbound serving | **PASS** | 101 inbound accepts during sync; 8/8 peers at tip |
-| muhash parity vs oracle | **BLOCKED** | gettxoutsetinfo hangs under store contention (open-path blocks) — logged as finding #1 |
+| muhash parity vs oracle | **PASS** | height 965,565: muhash 82806157...b6f44, txouts 165,395,754, bogosize 12,956,193,608 — identical to Core v31.99 (logs/parity.txt) |
 | stranger-handshake probe (post-sync) | **FAIL** | 0 replies to probe despite 8/8 peers — logged as finding #2 |
 
 Open issues found by this benchmark (real, filed in logs/parity.txt): (1)
