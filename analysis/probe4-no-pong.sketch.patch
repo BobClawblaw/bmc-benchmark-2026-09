@@ -1,0 +1,48 @@
+--- a/validation/p2p_inbound_probe.py
++++ b/validation/p2p_inbound_probe.py
+@@ handshake(): the missing leg (PROBE-4 — the real reason the probe hangs) @@
+     p = Peer(host, port, magic)
+     p.send('version', version_payload(magic))
+     got = p.drain(4.0)
+     names = [c for c, _ in got]
+     if 'verack' not in names:
+         return None, names
+     for cmd, pl in pre_verack:
+         p.send(cmd, pl)
+     p.send('verack')
+     p.drain(1.0)
+     return p, names
++
++    NOTE (2026-09-05, /mnt/2tbssd benchmark): the probe's hang against BOTH
++    bmc AND Core was here. After our verack the probe goes silent. A
++    tip-synced node, receiving a version with a zeroed addr_recv, answers
++    with ping (keepalive, and for a non-connectible peer an implicit
++    "you're dead — prove it") plus a getaddr probe. The probe never replies,
++    so at the ping timeout (72s in Core, same family in bmc) the NODE closes
++    the connection while a later per-probe handshake is mid-drain. The probe
++    then treats that as a dead socket, re-drains from a half-consumed buffer,
++    and deadlocks. Reproduced on both nodes: version/verack/feefilter/ping/
++    getaddr arrive, silence from the probe, node closes at ~70s; the probe
++    hangs forever. Fix: answer ping with pong and drain politely —
++
++      if 'ping' in [c for c,_ in got] handled post-handshake: p.send('pong', payload)
++      also answer getaddr with nothing (allowed) but keep the socket.
++
++    The loop belongs in drain(): whenever a ping arrives, echo a pong.
++
++    Second observation for whoever owns serve: a node replying getaddr to an
++    inbound node that advertised no services and zero height is Core
++    behavior (getaddr on version for address-collection), so bmc matching it
++    is fine — but bmc's ping-on-version is the strict-keepalive reading;
++    harmless to honest peers and worth a config later, not a defect.
+@@ drain(): keepalive so the node never times the probe out @@
+     def drain(self, secs=1.5):
+         """collect everything that arrives within `secs`"""
+         out, deadline = [], time.time() + secs
+         while True:
+             cmd, pl = self.recv_one(deadline)
+             if cmd is None: return out
+             out.append((cmd, pl))
++            if cmd == 'ping':                 # PROBE-4: keep the node happy
++                self.send('pong', pl)         # while we are thinking
+             if cmd == '<peer closed>': return out
