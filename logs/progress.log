@@ -285,3 +285,6 @@
 2026-09-05T03:31:15Z hb='' avg='11.1MB/s recv, 11.0MB/s write --' disk=992G rss=0.8G bad=0
 2026-09-05T03:36:19Z hb='' avg='11.1MB/s recv, 11.0MB/s write --' disk=1001G rss=0.8G bad=0
 2026-09-05T03:41:24Z hb='' avg='11.1MB/s recv, 11.0MB/s write --' disk=1007G rss=0.8G bad=0
+2026-09-05T03:46:28Z hb='' avg='11.1MB/s recv, 11.0MB/s write --' disk=1003G rss=0.8G bad=0
+2026-09-05T03:51:31Z hb='' avg='11.1MB/s recv, 11.0MB/s write --' disk=1010G rss=0.8G bad=0
+2026-09-05T03:56:36Z hb='' avg='11.1MB/s recv, 11.0MB/s write --' disk=1020G rss=0.8G bad=0
