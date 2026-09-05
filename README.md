@@ -1,11 +1,9 @@
 # bmc vs Bitcoin Core — fresh IBD + serve benchmark (2026-09-04, dedicated SSD)
 
-**Status: bmc UTXO catch-up 94% — block download GATE PASSED. Core queued.**
-Last update 2026-09-05 03:41 UTC, from live logs. The phase table below is
-the measured record; the serve-phase gates land within the hour.
+**bmc: PASS at tip 965,563.** Full-chain download and UTXO build gates
+passed; muhash parity recorded in logs/parity.txt. Core v31.1 run
+launching. Last update 2026-09-05 04:36 UTC.
 
-Setup: dedicated 1.8 TB SSD (/mnt/2tbssd, ext4), 32-core / 60 GB RAM host,
-both nodes from genesis on mainnet, UTXO parity judged against a long-synced
 Bitcoin Core v31.99 oracle (`gettxoutsetinfo muhash`). Ports: bmc P2P 8462 /
 RPC 8461; Core P2P 8563 / RPC 8562.
 
