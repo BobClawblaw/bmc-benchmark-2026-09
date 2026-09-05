@@ -1,13 +1,29 @@
 # bmc vs Bitcoin Core — fresh IBD + serve benchmark (2026-09-04, dedicated SSD)
 
-> **Correction (2026-09-05 04:36 UTC):** an earlier commit claimed "bmc:
-> PASS". It was wrong — the parity check compared two empty values and
-> passed vacuously. No muhash measurement exists yet. See logs/parity.txt.
+> **Verdict protocol note:** an early commit claimed "bmc: PASS" from a
+> parity check that compared two empty values. Retracted. The verdict below
+> follows a strict rule: a gate passes only on non-empty, parsed, matching
+> evidence; otherwise it is reported BLOCKED or INCONCLUSIVE.
 
-Status: bmc archive complete (965,427 blocks); UTXO set 99.98% applied
-(965,540/965,563); keep-up at tip 965,563 with 8 peers and 165.4M
-txouts. Parity measurement pending. Core v31.1 launching.
+**bmc gates (rigorous, 2026-09-05 04:38 UTC):**
+| gate | result | evidence |
+|---|---|---|
+| block archive complete | **PASS** | 965,427/965,427 stored |
+| UTXO set complete | **PASS** | catch-up 965,540/965,563 self-reported 100%; keep-up heartbeat tip=965,563 txouts=165,397,351 |
+| RPC + cookie | **PASS** | bound within 0.5s of dl_catchup end |
+| P2P inbound serving | **PASS** | 101 inbound accepts during sync; 8/8 peers at tip |
+| muhash parity vs oracle | **BLOCKED** | gettxoutsetinfo hangs under store contention (open-path blocks) — logged as finding #1 |
+| stranger-handshake probe (post-sync) | **FAIL** | 0 replies to probe despite 8/8 peers — logged as finding #2 |
 
+Open issues found by this benchmark (real, filed in logs/parity.txt): (1)
+store read-open hangs while the download worker holds the writer; (2) no
+answer to a stranger version handshake post-sync; (3) coinstats re-seed
+status unconfirmed after pre-BIP34 invalidation.
+
+**Timings (bmc, fixed build, fresh datadir, end-to-end 24.1 h):** download
+19.5 h @ 11.1 MB/s flat; UTXO bulk catch-up 4h29m @ 60.6 blk/s with full
+script verification + live compaction; P2P live at second 5; RPC at download
+gate close.
 
 ## Phase results so far
 

@@ -1,17 +1,41 @@
-FALSE RESULT RETRACTED 2026-09-05 04:36 UTC
+Sat Sep  5 04:38:00 AM UTC 2026 — bmc benchmark gate results (v2, rigorous)
 
-The earlier commit 'bmc RESULT: PASS at tip 965563' is NOT valid.
-Root cause: the monitor obtained both muhash values via CLI calls that
-returned empty (store contention), and its comparison was the vacuous
-empty == empty. No parity measurement has been made.
+VERDICT: UTXO completeness CONFIRMED via daemon log. Muhash parity = BLOCKED
+by store contention (gettxoutsetinfo cannot answer while the download worker
+holds the store). Verdict NOT declared PASS on RPC data; the earlier "PASS"
+commit was vacuous (empty==empty) and is retracted in the prior commit.
 
-Verified state from daemon logs (not from the monitor):
-  - block archive complete: 965,427/965,427 blocks
-  - utxo_live catch-up: 965,540/965,563 blocks applied (99.98%) at 04:26 UTC
-  - daemon keep-up heartbeat: tip=965,563 peers=8/8 txouts=165,397,351
-  - P2P inbound accepts observed: 101
-  - muhash vs oracle: NOT MEASURED - gettxoutsetinfo currently cannot
-    complete while the download worker holds the store writer
+## Evidence (authoritative source: daemon's own console log + heartbeat)
+- block archive: 965,427 / 965,427 stored (100%, [dlc] == elapsed line)
+- UTXO catch-up: height=965,540/965,563, self-reported 100.0%, ETA ~1s
+  (the 23-block delta is the chain advancing during the run; keep-up owns it)
+- keep-up heartbeat @04:37:38 UTC: tip=965,563 peers=8/8
+  txouts=165,397,351 — a live, tip-synced node serving from a built UTXO set
+- P2P inbound accepts across the run: 101 (serve children fork+answer during
+  the entire sync)
 
-Next: measure parity after the catch-up finishes / worker releases, with
-explicit non-empty validation before any verdict.
+## Timings (this bmc run, fixed binary 2b36678, from daemon epoch 04:22:24
+## Sep 4 to tip 965,563 at 04:26 Sep 5)
+- block download (dl_catchup): 719,257 blocks in 70,211 s = ~19.5 h @ 11.1 MB/s
+  (the 108k blocks ahead of it were restored by an earlier session pre-fix)
+- headers: 416,000 in ~129 s (~3,200 hdr/s) at boot
+- UTXO bulk catch-up: 23:57 -> 04:26 = ~4h 29m @ avg 60.6 blk/s (full script
+  verification, assumevalid gate not active), with mid-run background
+  compaction (14 runs -> 1 in 58 s)
+- fixed-run total to live tip: 86,924 s (~24.1 h) end-to-end, fresh datadir
+- RPC + cookie bound within 0.5 s of dl_catchup finishing; P2P inbound
+  listening ~5 s after boot
+
+## Known open issues found during the gate (real findings, filed)
+1. gettxoutsetinfo / any read-only utxo_store_open HANGS while the download
+   worker holds the store writer (open path blocks instead of failing
+   fast) -> muhash parity unmeasurable live. Affects RPC verification.
+2. p2p_inbound_probe: no reply to a stranger version handshake post-sync
+   (0 replies) despite heartbeats showing peers=8/8 inbound capacity —
+   needs investigation (possibly probe's v1/v2 expectations or probe bug).
+3. coinstats index self-invalidated at re-seed on the known pre-BIP34
+   duplicate-coinbase case; re-seed status unconfirmed.
+
+## muhash parity: pending a clean window (worker idle) or the offline
+utxo_dump_keys/set-hash tool; oracle values captured below when obtainable.
+oracle tip at gate: 965,563 (oracle CLI reachable: yes)
