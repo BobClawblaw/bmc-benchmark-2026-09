@@ -155,3 +155,4 @@ fix branch history: 2c6e989 (initial OR, failed 2 corners) -> 7481a8c (byte-floo
 2026-09-05T15:48:53Z TICK bmc_alive=2 result=PASS  prog='' avg='' | core result=pending prog='2026-09-05T15:47:08Z core height=777567 (80.52% of oracle tip 965630) peers=10' | oracle_tip=965630
 2026-09-05T16:03:56Z TICK bmc_alive=2 result=PASS  prog='' avg='' | core result=pending prog='2026-09-05T15:57:14Z core height=780994 (80.88% of oracle tip 965631) peers=10' | oracle_tip=965631
 2026-09-05T16:18:59Z TICK bmc_alive=2 result=PASS  prog='' avg='' | core result=pending prog='2026-09-05T16:17:14Z core height=788419 (81.65% of oracle tip 965632) peers=10' | oracle_tip=965633
+2026-09-05T16:34:03Z TICK bmc_alive=2 result=PASS  prog='' avg='' | core result=pending prog='2026-09-05T16:27:14Z core height=792534 (82.07% of oracle tip 965633) peers=10' | oracle_tip=965633
