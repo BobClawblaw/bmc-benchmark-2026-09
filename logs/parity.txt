@@ -37,3 +37,8 @@ the set itself proved exactly correct.
   handshake expectations suspected; the node demonstrably answers RPCs and
   the oracle comparison needed live P2P for height 965,565 to be fetched by
   the oracle, so real P2P is exercised; probe instrumentation next
+=== FINAL PARITY (three-way) ===
+height: 
+bmc   : b5dd0933963b3a82dd5431f1997a8c579e7dcb2425759d8b16d18414e518e6fc / 165329921
+core  :  / 
+oracle:  / 

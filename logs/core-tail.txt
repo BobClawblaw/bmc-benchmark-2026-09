@@ -1,0 +1,6 @@
+2026-09-05T19:13:49Z Peer is stalling block download, disconnecting peer=171
+2026-09-05T19:48:16Z Peer is stalling block download, disconnecting peer=192
+2026-09-05T20:45:25Z Peer is stalling block download, disconnecting peer=213
+2026-09-05T20:56:27Z Peer is stalling block download, disconnecting peer=291
+2026-09-05T21:55:55Z Peer is stalling block download, disconnecting peer=280
+2026-09-06T01:38:32Z UpdateTip: new best=00000000000000000001e9f4d2cc4e01245dc4cdb370284c3ecbde31d707f236 height=965702 version=0x2b492000 log2_work=96.344926 tx=1432754693 date='2026-09-06T01:33:03Z' progress=1.000000 cache=5665.3MiB(31525773txo)
