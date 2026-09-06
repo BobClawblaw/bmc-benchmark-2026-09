@@ -10,3 +10,4 @@
 2026-09-06T01:42:48Z core-complete: PARITY PROBLEM: core= bmc=b5dd0933 oracle= txouts /165329921/
 2026-09-06T01:42:50Z core-complete: PUSHED final parity
 2026-09-06T01:42:50Z core-complete: watcher done
+2026-09-06T02:01:11Z already PASS, refusing rerun

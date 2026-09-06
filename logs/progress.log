@@ -204,3 +204,7 @@
 2026-09-06T01:36:11Z core height= 
 2026-09-06T01:42:35Z core height=965702 (100.00% of oracle tip 965702) peers=10
 2026-09-06T01:46:11Z core height= 
+2026-09-06T01:52:35Z core rpc not answering (height blank)
+2026-09-06T01:56:12Z core height= 
+2026-09-06T02:02:35Z core rpc not answering (height blank)
+2026-09-06T02:02:35Z CORE DAEMON EXITED; RESULT=PASS core=965702 bmc=965702 ORACLE=965702
