@@ -196,3 +196,4 @@ fix branch history: 2c6e989 (initial OR, failed 2 corners) -> 7481a8c (byte-floo
 2026-09-06T02:05:53Z TICK bmc_alive=0 result=PASS prog='' avg='' | core result=PASS core=965702 bmc=965702 ORACLE=965702 prog='2026-09-06T02:02:35Z CORE DAEMON EXITED; RESULT=PASS core=965702 bmc=965702 ORACLE=965702' | oracle_tip=965705
 2026-09-06T02:08:02Z BENCHMARK COMPLETE: three-way parity PASS at 965702; final report pushed; archive move in progress
 2026-09-06T02:20:54Z TICK bmc_alive=0 result=pending prog='' avg='' | core result=PASS core=965702 bmc=965702 ORACLE=965702 prog='2026-09-06T02:16:12Z core height= ' | oracle_tip=965706
+2026-09-06T02:35:55Z TICK bmc_alive=0 result=pending prog='' avg='' | core result=PASS core=965702 bmc=965702 ORACLE=965702 prog='2026-09-06T02:26:12Z core height= ' | oracle_tip=965707
